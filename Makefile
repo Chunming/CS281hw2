@@ -17,6 +17,7 @@ OPTIONS_LIBS  = -ansi -pedantic -Wall -c
 
 all: GeneralHashFunctions.o sketch
 
+
 GeneralHashFunctions.o: GeneralHashFunctions.cpp GeneralHashFunctions.h
 	$(COMPILER) $(OPTIONS_LIBS) GeneralHashFunctions.cpp
 
