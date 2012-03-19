@@ -9,14 +9,9 @@
 #include <iostream>
 #include <fstream>
 
-
-
-//#include "MurmurHash2_64.cpp"
-
 using namespace std;
 
 int main() {
-
 
    FILE *fpa;
    fpa = fopen("enwikiaa", "r"); // Open file for read
@@ -59,19 +54,40 @@ int main() {
    // Declare map for Space Saving
    std::map <string, unsigned int> labelCount; // Seed a common std map
 
+   
    errFlag = analyze_file(fpa, labelCount);
+   if (errFlag == -1) {printf("ERROR in analyzing file \n");}     
+    
    errFlag = analyze_file(fpb, labelCount);
+   if (errFlag == -1) {printf("ERROR in analyzing file \n");}   
+   
    errFlag = analyze_file(fpc, labelCount);
+   if (errFlag == -1) {printf("ERROR in analyzing file \n");}   
+   
    errFlag = analyze_file(fpd, labelCount);
+   if (errFlag == -1) {printf("ERROR in analyzing file \n");}   
+   
    errFlag = analyze_file(fpe, labelCount);
+   if (errFlag == -1) {printf("ERROR in analyzing file \n");}   
+   
    errFlag = analyze_file(fpf, labelCount);
+   if (errFlag == -1) {printf("ERROR in analyzing file \n");}   
+   
    errFlag = analyze_file(fpg, labelCount);
+   if (errFlag == -1) {printf("ERROR in analyzing file \n");}   
+   
    errFlag = analyze_file(fph, labelCount);
+   if (errFlag == -1) {printf("ERROR in analyzing file \n");}   
+   
    errFlag = analyze_file(fpi, labelCount);
+   if (errFlag == -1) {printf("ERROR in analyzing file \n");}   
 
-   if (errFlag == -1) {
-      printf("ERROR in analyzing file \n");
-   }   
+   ofstream fResult("space_saving_result.txt"); // Open file for read
+   if (NULL == fResult) printf("ERROR opening file \n");
+   for (std::map<string, unsigned int>::iterator it = labelCount.begin(); it != labelCount.end(); ++it) { 
+      fResult << it->first << " " << it->second << "\n";
+   }
+   fResult.close();
 
    fclose(fpa);
    fclose(fpb);  
@@ -113,6 +129,8 @@ int analyze_file(FILE* fp, std::map <string, unsigned int> &labelCount) {
    char doubleQuote = '\"';
    char pipe = '|';
    char underScore = '_';
+   char leftArrow = '<';
+   char rightArrow = '>';
    char one = '1';
    char two = '2';
    char three = '3';
@@ -170,6 +188,8 @@ int analyze_file(FILE* fp, std::map <string, unsigned int> &labelCount) {
 		0==strncmp( &wordc[frontIdx], &ad, 1) ||
 		0==strncmp( &wordc[frontIdx], &pound, 1) ||
 		0==strncmp( &wordc[frontIdx], &star, 1) ||
+		0==strncmp( &wordc[frontIdx], &leftArrow, 1) ||
+		0==strncmp( &wordc[frontIdx], &rightArrow, 1) ||
 		0==strncmp( &wordc[frontIdx], &doubleQuote, 1) ) {
              
 	     frontIdx++;
@@ -203,9 +223,12 @@ int analyze_file(FILE* fp, std::map <string, unsigned int> &labelCount) {
          cleanWord[wordLen]='\0';
          string word = string(cleanWord);
 
+	printf("%s \n", cleanWord);
+
          // 
          //Use Space Saving
          //
+         //std::cout << "Word is " << word << "\n";
          errFlag = space_saving_insert(&labelCount, &word, 2000);
          if (-1 == errFlag) {
             printf("Space saving insert ERROR \n");
@@ -217,138 +240,19 @@ int analyze_file(FILE* fp, std::map <string, unsigned int> &labelCount) {
 
       wordIdx.clear(); // Clear all elements in vector
 
-
-
- 
-
- 
       index++;
-      if((index%10000) == 0 ) { // Save frequency 
-         ofstream fResult("wiki_result"); // Open file for read
-         if (NULL == fResult) printf("ERROR opening file \n");
-         for (std::map<string, unsigned int>::iterator it = labelCount.begin(); it != labelCount.end(); ++it) { 
-	    fResult << it->first << " " << it->second << "\n";
-         }
-         fResult.close();
-      }
    }
    printf("Completed \n");
    return 0;
-}
-
-
-// Implement hash function from the General Hash Function Library
-// Returns an unsigned int value
-unsigned int hash_function(int i, const std::string keyPtr) {
-   switch (i) {
-      case 0:
-         return RSHash(keyPtr);
-      case 1:
-	 return JSHash(keyPtr);
-      case 2:
-         return PJWHash(keyPtr);
-      case 3:
-        return  ELFHash(keyPtr);
-      case 4:
-         return BKDRHash(keyPtr);
-      case 5:
-         return SDBMHash(keyPtr);
-      case 6:
-         return DJBHash(keyPtr);
-      case 7:
-         return DEKHash(keyPtr);
-      case 8:
-         return BPHash(keyPtr);
-      case 9:
-         return FNVHash(keyPtr);
-      case 10:
-         return APHash(keyPtr);
-   }
-
-   return -1; // If no case is called, then throw ERROR
-}
-
-
-
-
-// 5.3.1 Implement CountMin Sketch
-// d : No. of hash functions
-// m : No. of bins per hash 
-int count_min_insert(unsigned int** hashMatrix, std::string* word, unsigned int d, unsigned int m) {
-
-   if (NULL == word) return -1; // string is empty
-
-   unsigned int idx;
-   for (unsigned int i=0; i<d; ++i) { // From 0 to the dth hash function
-      idx = hash_function(i, *word);
-      hashMatrix[i][idx%m]++; // Mod by no. of bins
-      //printf("Count min inserted at bin %u for hash %d, value is %u \n", idx%m, i, hashMatrix[i][idx%m] );
-   }
-   
-   return 0;
-}
-
-unsigned int count_min_query(unsigned int** hashMatrix, std::string* word, unsigned int d, unsigned int m) {
-
-   if (NULL == word) return -1; // string is empty
-
-   unsigned int idx;
-   unsigned int count;
-   unsigned int countMin = UINT_MAX;
-   for (unsigned int i=0; i<d; ++i) { // From 0 to the dth hash function
-      idx = hash_function(i, *word);
-      count = hashMatrix[i][idx%m]; // Mod by no. of bins
-      //printf("Count at bin %u for hash %d, value is %u \n", idx%m, i, hashMatrix[i][idx%m] );
-      if (count<countMin) {
-         countMin = count;
-      }
-   }
-   
-   return countMin;
-}
-
-// 5.3.2 Implement improved CountMin Sketch for insert only operations
-// Only update the mth element in the dth hash function with the min value
-int improved_count_min_insert(unsigned int** hashMatrix, std::string* word, unsigned int d, unsigned int m) {
-
-   if (NULL == word) return -1; // string is empty
-
-   unsigned int idx;
-   unsigned int count;
-   unsigned int minCount = UINT_MAX;
-   unsigned int minIdx, minD;
-   for (unsigned int i=0; i<d; ++i) { // From 0 to the dth hash function
-      idx = hash_function(i, *word);
-      count = hashMatrix[i][idx%m];
-      if (count < minCount) {
-         minCount = count;
-	 minD = i; // Which hash function
-	 minIdx = idx; // Which index at the particular hash func
-      }
-   }
-
-   hashMatrix[minD][minIdx]++; // Increment the smallest count only
-   return 0;
-
 }
 
 // 5.3.3 Implement SpaceSaving Sketch
 // Use BiMap
 int space_saving_insert(std::map<string, unsigned int>* labelCount, std::string* label, unsigned int listSize) {
 
-
    std::map<string, unsigned int>::iterator fItr;
-
-   //printf("Check 1 \n");
-
    fItr = (*labelCount).find(*label);
-
-   //printf("Check 2 \n");
-
    if(fItr == (*labelCount).end()) { // label is not in the list
-
-   //printf ("Check 3 \n");
-
    //printf("Label is not in list \n");
       if ((*labelCount).size()>=listSize) { // Check if bin size has reached max 
 
@@ -364,9 +268,11 @@ int space_saving_insert(std::map<string, unsigned int>* labelCount, std::string*
          }
 
          //std::cout << "Deleted label is: " << minLabel << "\n";
-         (*labelCount).erase(minLabel); // Set label to new
+         (*labelCount).erase(minLabel);
 	 (*labelCount)[*label] = minCount + 1; // Update count
-         //printf("New count is %u \n", (*labelCount)[*label]);
+         if (minCount == UINT_MAX) {printf("Warning: Buffer overflow in Map \n");}
+
+	 //printf("New count is %u \n", (*labelCount)[*label]);
          //std::cout << "Label is: " << *label << "\n";
 
       }
@@ -385,55 +291,5 @@ int space_saving_insert(std::map<string, unsigned int>* labelCount, std::string*
 
   return 0; // std::map <string, unsigned int> labelCount;
 }
-
-
-/*
-
-
-   int d = 10; // No. of hash functions
-   int m = 100000; // Max no. of bins
-   std::string word;
-
-
-   // Allocate memory for Count Min
-   unsigned int** hashTable = new unsigned int* [d];
-   if (NULL==hashTable) {
-      printf("Mem allocation ERROR \n");
-      return -1;
-   }
-
-   for (int i=0; i<d; i++) {
-      hashTable[i] = new unsigned int [m];
-      memset(hashTable[i], NULL, m*sizeof(unsigned int)); // Ini. elements to 0
-
-      if (NULL==hashTable[i]) {
-         printf("Mem allocation ERROR \n");
-	 return -1;
-      }
-   }
-
-
-      //
-      // Insert word into Count Min Hash Table
-      //
-      errFlag = count_min_insert(hashTable, &word, d, m);
-      if (-1 == errFlag) {
-         printf("Count min insert ERROR \n");
-         return -1;
-      }
-
-      //
-      // Query Count Min for result
-      //
-      //unsigned int count = count_min_query(hashTable, &word, d, m);
-      //printf("Count is %u \n", count);
-
-   // Deallocate memory 
-   for (int i=0; i<d; i++) {
-      delete [] hashTable[i];
-   }
-   delete [] hashTable;
-*/
-
 
 
