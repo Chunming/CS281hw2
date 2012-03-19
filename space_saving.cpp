@@ -58,6 +58,8 @@ int main() {
    errFlag = analyze_file(fpa, labelCount);
    if (errFlag == -1) {printf("ERROR in analyzing file \n");}     
     
+/*
+
    errFlag = analyze_file(fpb, labelCount);
    if (errFlag == -1) {printf("ERROR in analyzing file \n");}   
    
@@ -82,9 +84,30 @@ int main() {
    errFlag = analyze_file(fpi, labelCount);
    if (errFlag == -1) {printf("ERROR in analyzing file \n");}   
 
+   */
+
+    int fIdx = 0;
+    vector<Node> myVector(2000);
+    for (std::map<string, unsigned int>::iterator it = labelCount.begin(); it != labelCount.end(); ++it) { 
+       myVector[fIdx].label = it->first;
+       myVector[fIdx].count = it->second;
+       fIdx ++;
+       //if (fIdx>=2000) {break;}
+    }
+    printf("fIdx value is %d \n", fIdx);
+
+    sort(myVector.begin(), myVector.end(), comparison()); // Sort from smallest to largest
+    reverse(myVector.begin(),myVector.end()); // Sort from largest to smallest
+    //cout << myVector[sIdx].label << " " << myVector[sIdx].count << " " <<  sIdx << "\n";
+
+    std::map <string, unsigned int> sortedCount;
+    for (int sIdx=0; sIdx< 1000; ++sIdx) {
+       sortedCount[myVector[sIdx].label] = myVector[sIdx].count; // Set all word counts to 0
+    }
+
    ofstream fResult("space_saving_result.txt"); // Open file for read
    if (NULL == fResult) printf("ERROR opening file \n");
-   for (std::map<string, unsigned int>::iterator it = labelCount.begin(); it != labelCount.end(); ++it) { 
+   for (std::map<string, unsigned int>::iterator it = sortedCount.begin(); it != sortedCount.end(); ++it) { 
       fResult << it->first << " " << it->second << "\n";
    }
    fResult.close();
@@ -223,7 +246,7 @@ int analyze_file(FILE* fp, std::map <string, unsigned int> &labelCount) {
          cleanWord[wordLen]='\0';
          string word = string(cleanWord);
 
-	printf("%s \n", cleanWord);
+	//printf("%s \n", cleanWord);
 
          // 
          //Use Space Saving

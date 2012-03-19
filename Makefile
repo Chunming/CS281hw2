@@ -12,7 +12,7 @@
 #
 
 COMPILER      = -c++
-OPTIONS       = -ansi -g -pedantic -Wall -o
+OPTIONS       = -ansi -pedantic -Wall -o
 OPTIONS_LIBS  = -ansi -pedantic -Wall -c
 
 all: GeneralHashFunctions.o sketch space_saving accurate_count count_min improved_count_min

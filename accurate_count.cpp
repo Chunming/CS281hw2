@@ -15,7 +15,7 @@ int main() {
 
 
    FILE *fResult;
-   fResult = fopen("wiki_result.txt", "r"); // Open file for read
+   fResult = fopen("space_saving_result.txt", "r"); // Open file for read
    if (NULL == fResult) printf("ERROR opening file \n");
 
    FILE *fpa;
@@ -59,22 +59,23 @@ int main() {
    char tStr[1000];
    unsigned int tCount; // Target words count
    int fIdx = 0;
-   vector<Node> myVector(2000);
+   vector<Node> myVector(1000);
    while(!feof(fResult)) {
       fscanf(fResult, "%s %u", tStr, &tCount );
       myVector[fIdx].count = tCount;
       myVector[fIdx].label = tStr;
       fIdx ++;
-      if (fIdx>=2000) {break;}
+      if (fIdx>=1000) {break;}
    }
    sort(myVector.begin(), myVector.end(), comparison());
+   reverse(myVector.begin(),myVector.end()); // Sort from largest to smallest
 
    // Sort STL Map data in order within array
    // Get top 1000 words
    std::map <string, unsigned int> labelCount;
    for (int sIdx=0; sIdx< 1000; ++sIdx) {
       labelCount[myVector[sIdx].label] = 0; // Inititalize all top K words to 0
-      //cout << myVector[sIdx].label << " " << myVector[sIdx].count << " " <<  sIdx << "\n";
+      cout << myVector[sIdx].label << " " << myVector[sIdx].count << " " <<  sIdx << "\n";
    }
 
 /*
@@ -90,6 +91,7 @@ int main() {
    errFlag = analyze_file(fpa, labelCount);
    if (errFlag == -1) {printf("ERROR in analyzing file \n");}   
 
+   /*
    errFlag = analyze_file(fpb, labelCount);
    if (errFlag == -1) {printf("ERROR in analyzing file \n");}   
 
@@ -113,7 +115,7 @@ int main() {
  
    errFlag = analyze_file(fpi, labelCount);
    if (errFlag == -1) {printf("ERROR in analyzing file \n");}   
-
+*/
 
    ofstream fAccResult("accurate_result.txt"); // Open file for read
    if (NULL == fAccResult) printf("ERROR opening file \n");
@@ -173,7 +175,8 @@ int analyze_file(FILE* fp, std::map <string, unsigned int> &labelCount) {
    char eight = '8';
    char nine = '9';
    char zero = '0';
-
+   char leftArrow = '<';
+   char rightArrow = '>';
    unsigned int index = 0;
    vector<int> wordIdx;
 
@@ -219,6 +222,8 @@ int analyze_file(FILE* fp, std::map <string, unsigned int> &labelCount) {
 		0==strncmp( &wordc[frontIdx], &ad, 1) ||
 		0==strncmp( &wordc[frontIdx], &pound, 1) ||
 		0==strncmp( &wordc[frontIdx], &star, 1) ||
+		0==strncmp( &wordc[frontIdx], &leftArrow, 1) ||
+		0==strncmp( &wordc[frontIdx], &rightArrow, 1) ||
 		0==strncmp( &wordc[frontIdx], &doubleQuote, 1) ) {
              
 	     frontIdx++;

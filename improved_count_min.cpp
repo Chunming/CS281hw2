@@ -15,7 +15,7 @@ int main() {
 
 
   FILE *fResult;
-  fResult = fopen("wiki_result.txt", "r"); // Open file for read
+  fResult = fopen("space_saving_result.txt", "r"); // Open file for read
   if (NULL == fResult) printf("ERROR opening file \n");
 
    FILE *fpa;
@@ -82,20 +82,21 @@ int main() {
     char tStr[1000];
     unsigned int tCount; // Target words count
     int fIdx = 0;
-    vector<Node> myVector(2000);
+    vector<Node> myVector(1000);
     while(!feof(fResult)) {
        fscanf(fResult, "%s %u", tStr, &tCount );
        myVector[fIdx].count = tCount;
        myVector[fIdx].label = tStr;
        fIdx ++;
-       if (fIdx>=2000) {break;}
+       if (fIdx>=1000) {break;}
     }
     sort(myVector.begin(), myVector.end(), comparison());
+    reverse(myVector.begin(),myVector.end()); // Sort from largest to smallest 
 
     std::map <string, unsigned int> labelCount;
     for (int sIdx=0; sIdx< 1000; ++sIdx) {
        labelCount[myVector[sIdx].label] = 0; // Set all word counts to 0
-       //cout << myVector[sIdx].label << " " << myVector[sIdx].count << " " <<  sIdx << "\n";
+       cout << myVector[sIdx].label << " " << myVector[sIdx].count << " " <<  sIdx << "\n";
     }
 
 
@@ -107,6 +108,7 @@ int main() {
    errFlag = count_min_analysis(fpa, labelCount, hashTable, d, m);
    if (errFlag == -1) {printf("ERROR in analyzing file \n");}   
 
+   /*
    errFlag = count_min_analysis(fpb, labelCount, hashTable, d, m);
    if (errFlag == -1) {printf("ERROR in analyzing file \n");}   
    
@@ -130,7 +132,7 @@ int main() {
    
    errFlag = count_min_analysis(fpi, labelCount, hashTable, d, m);
    if (errFlag == -1) {printf("ERROR in analyzing file \n");}   
-  
+*/  
    
    //
    // Query Count Min for results
@@ -208,6 +210,8 @@ int count_min_analysis(FILE* fp, std::map <string, unsigned int> &labelCount, un
    char eight = '8';
    char nine = '9';
    char zero = '0';
+   char leftArrow = '<';
+   char rightArrow = '>';
    int errFlag;
 
    unsigned int index = 0;
@@ -255,6 +259,8 @@ int count_min_analysis(FILE* fp, std::map <string, unsigned int> &labelCount, un
 		0==strncmp( &wordc[frontIdx], &ad, 1) ||
 		0==strncmp( &wordc[frontIdx], &pound, 1) ||
 		0==strncmp( &wordc[frontIdx], &star, 1) ||
+		0==strncmp( &wordc[frontIdx], &leftArrow, 1) ||
+		0==strncmp( &wordc[frontIdx], &rightArrow, 1) ||
 		0==strncmp( &wordc[frontIdx], &doubleQuote, 1) ) {
              
 	     frontIdx++;
@@ -299,6 +305,9 @@ int count_min_analysis(FILE* fp, std::map <string, unsigned int> &labelCount, un
          }
          else {
 
+		 //cout << word << "\n";
+
+
             //
             // Insert word into Count Min Hash Table
             //
@@ -307,6 +316,9 @@ int count_min_analysis(FILE* fp, std::map <string, unsigned int> &labelCount, un
                printf("Count min insert ERROR \n");
                return -1;
             }
+
+
+
          }
 
          delete [] cleanWord;
@@ -399,6 +411,9 @@ int improved_count_min_insert(unsigned int** hashMatrix, std::string* word, unsi
    unsigned int count;
    unsigned int minCount = UINT_MAX;
    unsigned int minIdx, minD;
+
+//printf("Check 1 \n");
+
    for (unsigned int i=0; i<d; ++i) { // From 0 to the dth hash function
       idx = hash_function(i, *word);
       count = hashMatrix[i][idx%m];
@@ -409,7 +424,12 @@ int improved_count_min_insert(unsigned int** hashMatrix, std::string* word, unsi
       }
    }
 
-   hashMatrix[minD][minIdx]++; // Increment the smallest count only
+//printf("Check 2 \n");
+
+   hashMatrix[minD][minIdx%m]++; // Increment the smallest count only
+
+//printf("Check 3 \n");
+
    return 0;
 
 }
